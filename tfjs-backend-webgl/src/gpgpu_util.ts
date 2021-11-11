@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {PixelData, TypedArray} from '@tensorflow/tfjs-core';
+import {env, PixelData, TypedArray} from '@tensorflow/tfjs-core';
 
 import {getGlslDifferences} from './glsl_version';
 import * as tex_util from './tex_util';
@@ -60,18 +60,24 @@ function createAndConfigureTexture(
   const tex2d = gl.TEXTURE_2D;
   webgl_util.callAndCheck(gl, () => gl.bindTexture(tex2d, texture));
   webgl_util.callAndCheck(
-      gl, () => gl.texParameteri(tex2d, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE));
-  webgl_util.callAndCheck(
-      gl, () => gl.texParameteri(tex2d, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE));
-  webgl_util.callAndCheck(
       gl, () => gl.texParameteri(tex2d, gl.TEXTURE_MIN_FILTER, gl.NEAREST));
   webgl_util.callAndCheck(
       gl, () => gl.texParameteri(tex2d, gl.TEXTURE_MAG_FILTER, gl.NEAREST));
-  webgl_util.callAndCheck(
-      gl,
-      () => gl.texImage2D(
-          tex2d, 0, internalFormat, width, height, 0, textureFormat,
-          textureType, null));
+  if (env().getNumber('WEBGL_VERSION') === 1) {
+    webgl_util.callAndCheck(
+        gl, () => gl.texParameteri(tex2d, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE));
+    webgl_util.callAndCheck(
+        gl, () => gl.texParameteri(tex2d, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE));
+    webgl_util.callAndCheck(
+        gl,
+        () => gl.texImage2D(
+            tex2d, 0, internalFormat, width, height, 0, textureFormat,
+            textureType, null));
+  } else {
+    webgl_util.callAndCheck(
+        gl,
+        () => gl.texStorage2D(gl.TEXTURE_2D, 1, internalFormat, width, height));
+  }
   webgl_util.callAndCheck(gl, () => gl.bindTexture(gl.TEXTURE_2D, null));
   return texture;
 }
@@ -214,7 +220,7 @@ export function uploadPixelDataToTexture(
         () => gl.texImage2D(
             gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,
             pixels as ImageData | HTMLImageElement | HTMLCanvasElement |
-                HTMLVideoElement|ImageBitmap));
+                HTMLVideoElement | ImageBitmap));
   }
 
   webgl_util.callAndCheck(gl, () => gl.bindTexture(gl.TEXTURE_2D, null));
