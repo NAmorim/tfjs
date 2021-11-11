@@ -586,19 +586,20 @@ export function isDownloadFloatTextureEnabled(webGLVersion: number): boolean {
       return false;
     }
   } else {
-    if (hasExtension(gl, 'EXT_color_buffer_float')) {
-      return createFloatTextureAndBindToFramebuffer(gl);
-    }
+    return true;
+    // if (hasExtension(gl, 'EXT_color_buffer_float')) {
+    //   return createFloatTextureAndBindToFramebuffer(gl);
+    // }
 
-    const COLOR_BUFFER_HALF_FLOAT = 'EXT_color_buffer_half_float';
-    if (hasExtension(gl, COLOR_BUFFER_HALF_FLOAT)) {
-      const textureHalfFloatExtension =
-          gl.getExtension(COLOR_BUFFER_HALF_FLOAT);
-      return createHalfFloatTextureAndBindToFramebuffer(
-          gl, textureHalfFloatExtension);
-    }
+    // const COLOR_BUFFER_HALF_FLOAT = 'EXT_color_buffer_half_float';
+    // if (hasExtension(gl, COLOR_BUFFER_HALF_FLOAT)) {
+    //   const textureHalfFloatExtension =
+    //       gl.getExtension(COLOR_BUFFER_HALF_FLOAT);
+    //   return createHalfFloatTextureAndBindToFramebuffer(
+    //       gl, textureHalfFloatExtension);
+    // }
 
-    return false;
+    // return false;
   }
 
   const isFrameBufferComplete = createFloatTextureAndBindToFramebuffer(gl);
@@ -634,34 +635,34 @@ function createFloatTextureAndBindToFramebuffer(gl: WebGLRenderingContext):
   return isFrameBufferComplete;
 }
 
-function createHalfFloatTextureAndBindToFramebuffer(
-    // tslint:disable-next-line:no-any
-    gl: WebGLRenderingContext, textureHalfFloatExtension: any): boolean {
-  const texConfig = getTextureConfig(gl, textureHalfFloatExtension);
-  const texture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, texture);
+// function createHalfFloatTextureAndBindToFramebuffer(
+//     // tslint:disable-next-line:no-any
+//     gl: WebGLRenderingContext, textureHalfFloatExtension: any): boolean {
+//   const texConfig = getTextureConfig(gl, textureHalfFloatExtension);
+//   const texture = gl.createTexture();
+//   gl.bindTexture(gl.TEXTURE_2D, texture);
 
-  const width = 1;
-  const height = 1;
-  gl.texImage2D(
-      gl.TEXTURE_2D, 0, texConfig.internalFormatHalfFloat, width, height, 0,
-      texConfig.textureFormatFloat, texConfig.textureTypeHalfFloat, null);
+//   const width = 1;
+//   const height = 1;
+//   gl.texImage2D(
+//       gl.TEXTURE_2D, 0, texConfig.internalFormatHalfFloat, width, height, 0,
+//       texConfig.textureFormatFloat, texConfig.textureTypeHalfFloat, null);
 
-  const frameBuffer = gl.createFramebuffer();
-  gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
-  gl.framebufferTexture2D(
-      gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+//   const frameBuffer = gl.createFramebuffer();
+//   gl.bindFramebuffer(gl.FRAMEBUFFER, frameBuffer);
+//   gl.framebufferTexture2D(
+//       gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
 
-  const isFrameBufferComplete =
-      gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+//   const isFrameBufferComplete =
+//       gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
 
-  gl.bindTexture(gl.TEXTURE_2D, null);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  gl.deleteTexture(texture);
-  gl.deleteFramebuffer(frameBuffer);
+//   gl.bindTexture(gl.TEXTURE_2D, null);
+//   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+//   gl.deleteTexture(texture);
+//   gl.deleteFramebuffer(frameBuffer);
 
-  return isFrameBufferComplete;
-}
+//   return isFrameBufferComplete;
+// }
 
 export function isWebGLFenceEnabled(webGLVersion: number) {
   if (webGLVersion !== 2) {
