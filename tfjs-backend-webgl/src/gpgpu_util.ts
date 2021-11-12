@@ -56,7 +56,6 @@ function createAndConfigureTexture(
     textureType: number): WebGLTexture {
   webgl_util.validateTextureSize(width, height);
   const texture = webgl_util.createTexture(gl);
-
   const tex2d = gl.TEXTURE_2D;
   webgl_util.callAndCheck(gl, () => gl.bindTexture(tex2d, texture));
   webgl_util.callAndCheck(
@@ -77,9 +76,8 @@ function createAndConfigureTexture(
     // console.log('create', width, height, internalFormat);
     webgl_util.callAndCheck(
         gl,
-        () =>
-            (gl as WebGL2RenderingContext)
-                .texStorage2D(gl.TEXTURE_2D, 1, internalFormat, width, height));
+        () => (gl as WebGL2RenderingContext)
+                  .texStorage2D(tex2d, 1, internalFormat, width, height));
   }
   webgl_util.callAndCheck(gl, () => gl.bindTexture(gl.TEXTURE_2D, null));
   gl.flush();

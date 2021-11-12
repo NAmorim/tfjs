@@ -51,6 +51,12 @@ export function getWebGLContext(webGLVersion: number): WebGLRenderingContext {
     delete contexts[webGLVersion];
     return getWebGLContext(webGLVersion);
   }
+  const ext = gl.getExtension('GMAN_debug_helper');
+  if (ext) {
+    ext.setConfiguration({
+      failUnsetUniforms: false,
+    });
+  }
 
   gl.disable(gl.DEPTH_TEST);
   gl.disable(gl.STENCIL_TEST);

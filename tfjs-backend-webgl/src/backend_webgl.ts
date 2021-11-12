@@ -1008,7 +1008,7 @@ export class MathBackendWebGL extends KernelBackend {
       const isByteArray =
           values instanceof Uint8Array || values instanceof Uint8ClampedArray;
 
-      if (isPacked) {
+      if (isPacked || usage === TextureUsage.UPLOAD) {
         [width, height] = tex_util.getPackedMatrixTextureShapeWidthHeight(
             texShape[0], texShape[1]);
         program = new EncodeMatrixPackedProgram(shapeAs3D, isByteArray);
@@ -1024,6 +1024,7 @@ export class MathBackendWebGL extends KernelBackend {
       } else {
         this.texData.get(tempDenseInputHandle.dataId).usage =
             TextureUsage.UPLOAD;
+        this.texData.get(tempDenseInputHandle.dataId).isPacked = true;
       }
       this.gpgpu.uploadDenseMatrixToTexture(
           this.getTexture(tempDenseInputHandle.dataId), width, height,
