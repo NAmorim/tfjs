@@ -193,6 +193,8 @@ function numBytesForInternalFormat(
     return 16;
   } else if (internalFormat === gl.RGBA) {
     return 16;
+  } else if (internalFormat === glany.RGBA8) {
+    return 16;
   } else if (internalFormat === glany.RGBA16F) {
     return 8;
   }
