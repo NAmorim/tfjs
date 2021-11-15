@@ -1004,31 +1004,29 @@ export class MathBackendWebGL extends KernelBackend {
       const shapeAs3D = webgl_util.getShapeAs3D(shape);
 
       let program;
-      let width = texShape[1], height = texShape[0];
       const isByteArray =
           values instanceof Uint8Array || values instanceof Uint8ClampedArray;
 
-      if (isPacked || usage === TextureUsage.UPLOAD) {
-        [width, height] = tex_util.getPackedMatrixTextureShapeWidthHeight(
-            texShape[0], texShape[1]);
+      if (isPacked) {
         program = new EncodeMatrixPackedProgram(shapeAs3D, isByteArray);
       } else {
         program = new EncodeMatrixProgram(shapeAs3D, isByteArray);
       }
 
-      const tempDenseInputHandle =
-          this.makeTensorInfo([texShape[0], texShape[1]], dtype);
+      const tempDenseInputHandle = this.makeTensorInfo(shape, dtype);
+      const tempDenseTexData = this.texData.get(tempDenseInputHandle.dataId);
+
       if (isByteArray) {
-        this.texData.get(tempDenseInputHandle.dataId).usage =
-            TextureUsage.PIXELS;
+        tempDenseTexData.usage = TextureUsage.PIXELS;
       } else {
-        this.texData.get(tempDenseInputHandle.dataId).usage =
-            TextureUsage.UPLOAD;
-        this.texData.get(tempDenseInputHandle.dataId).isPacked = true;
+        tempDenseTexData.usage = TextureUsage.UPLOAD;
       }
+      const tempDenseTexture = this.getTexture(tempDenseInputHandle.dataId);
+      let width = tempDenseTexData.texShape[1],
+          height = tempDenseTexData.texShape[0];
+
       this.gpgpu.uploadDenseMatrixToTexture(
-          this.getTexture(tempDenseInputHandle.dataId), width, height,
-          values as TypedArray);
+          tempDenseTexture, width, height, values as TypedArray);
 
       const customValues = [[height, width]];
       // We want the output to remain packed regardless of the value of
@@ -1055,7 +1053,8 @@ export class MathBackendWebGL extends KernelBackend {
       }
     } else {
       const newTexture = this.acquireTexture(texShape, usage, dtype, isPacked);
-      texData.texture = newTexture;
+      texData.texture = newTexture.texture;
+      texData.texShape = newTexture.texShape;
     }
   }
 
@@ -1074,7 +1073,7 @@ export class MathBackendWebGL extends KernelBackend {
 
   private acquireTexture(
       texShape: [number, number], texType: TextureUsage, dtype: DataType,
-      isPacked: boolean): WebGLTexture {
+      isPacked: boolean): tex_util.TextureCreationResult {
     this.numBytesInGPU += this.computeBytes(texShape, dtype);
     if (!this.warnedAboutMemory &&
         this.numBytesInGPU > this.numMBBeforeWarning * 1024 * 1024) {

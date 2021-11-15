@@ -53,35 +53,34 @@ export function createIndexBuffer(gl: WebGLRenderingContext): WebGLBuffer {
 function createAndConfigureTexture(
     gl: WebGLRenderingContext, width: number, height: number,
     internalFormat: number, textureFormat: number,
-    textureType: number): WebGLTexture {
+    textureType: number): tex_util.TextureCreationResult {
   webgl_util.validateTextureSize(width, height);
   const texture = webgl_util.createTexture(gl);
   const tex2d = gl.TEXTURE_2D;
   webgl_util.callAndCheck(gl, () => gl.bindTexture(tex2d, texture));
+  webgl_util.callAndCheck(
+      gl, () => gl.texParameteri(tex2d, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE));
+  webgl_util.callAndCheck(
+      gl, () => gl.texParameteri(tex2d, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE));
   webgl_util.callAndCheck(
       gl, () => gl.texParameteri(tex2d, gl.TEXTURE_MIN_FILTER, gl.NEAREST));
   webgl_util.callAndCheck(
       gl, () => gl.texParameteri(tex2d, gl.TEXTURE_MAG_FILTER, gl.NEAREST));
   if (env().getNumber('WEBGL_VERSION') === 1) {
     webgl_util.callAndCheck(
-        gl, () => gl.texParameteri(tex2d, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE));
-    webgl_util.callAndCheck(
-        gl, () => gl.texParameteri(tex2d, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE));
-    webgl_util.callAndCheck(
         gl,
         () => gl.texImage2D(
             tex2d, 0, internalFormat, width, height, 0, textureFormat,
             textureType, null));
   } else {
-    // console.log('create', width, height, internalFormat);
+    console.log('create', width, height, internalFormat);
     webgl_util.callAndCheck(
         gl,
         () => (gl as WebGL2RenderingContext)
                   .texStorage2D(tex2d, 1, internalFormat, width, height));
   }
   webgl_util.callAndCheck(gl, () => gl.bindTexture(gl.TEXTURE_2D, null));
-  gl.flush();
-  return texture;
+  return {texture, texShape: [height, width]};
 }
 
 export function getInternalFormatForFloat32MatrixTexture(
@@ -91,7 +90,7 @@ export function getInternalFormatForFloat32MatrixTexture(
 
 export function createFloat32MatrixTexture(
     gl: WebGLRenderingContext, rows: number, columns: number,
-    textureConfig: TextureConfig): WebGLTexture {
+    textureConfig: TextureConfig): tex_util.TextureCreationResult {
   const [width, height] =
       tex_util.getUnpackedMatrixTextureShapeWidthHeight(rows, columns);
   return createAndConfigureTexture(
@@ -107,7 +106,7 @@ export function getInternalFormatForFloat16MatrixTexture(
 
 export function createFloat16MatrixTexture(
     gl: WebGLRenderingContext, rows: number, columns: number,
-    textureConfig: TextureConfig): WebGLTexture {
+    textureConfig: TextureConfig): tex_util.TextureCreationResult {
   const [width, height] =
       tex_util.getUnpackedMatrixTextureShapeWidthHeight(rows, columns);
   return createAndConfigureTexture(
@@ -123,7 +122,7 @@ export function getInternalFormatForUnsignedBytesMatrixTexture(
 
 export function createUnsignedBytesMatrixTexture(
     gl: WebGLRenderingContext, rows: number, columns: number,
-    textureConfig: TextureConfig): WebGLTexture {
+    textureConfig: TextureConfig): tex_util.TextureCreationResult {
   const [width, height] =
       tex_util.getUnpackedMatrixTextureShapeWidthHeight(rows, columns);
   return createAndConfigureTexture(
@@ -139,7 +138,7 @@ export function getInternalFormatForPackedMatrixTexture(
 
 export function createPackedMatrixTexture(
     gl: WebGLRenderingContext, rows: number, columns: number,
-    textureConfig: TextureConfig): WebGLTexture {
+    textureConfig: TextureConfig): tex_util.TextureCreationResult {
   const [width, height] =
       tex_util.getPackedMatrixTextureShapeWidthHeight(rows, columns);
   return createAndConfigureTexture(
@@ -154,7 +153,7 @@ export function getInternalFormatForFloat16PackedMatrixTexture(
 
 export function createFloat16PackedMatrixTexture(
     gl: WebGLRenderingContext, rows: number, columns: number,
-    textureConfig: TextureConfig): WebGLTexture {
+    textureConfig: TextureConfig): tex_util.TextureCreationResult {
   const [width, height] =
       tex_util.getPackedMatrixTextureShapeWidthHeight(rows, columns);
   return createAndConfigureTexture(
@@ -202,7 +201,6 @@ export function uploadDenseMatrixToTexture(
         () => gl.texSubImage2D(
             gl.TEXTURE_2D, 0, 0, 0, width, height, gl.RGBA, texelDataType,
             dataForUpload));
-    gl.flush();
   } else {
     webgl_util.callAndCheck(
         gl,

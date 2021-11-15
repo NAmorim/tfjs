@@ -97,6 +97,11 @@ export interface TextureData {
   };
 }
 
+export interface TextureCreationResult {
+  texture: WebGLTexture;
+  texShape: [number, number];
+}
+
 export function getUnpackedMatrixTextureShapeWidthHeight(
     rows: number, columns: number): [number, number] {
   return [columns, rows];

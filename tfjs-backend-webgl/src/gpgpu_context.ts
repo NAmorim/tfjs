@@ -136,21 +136,21 @@ export class GPGPUContext {
   }
 
   public createFloat32MatrixTexture(rows: number, columns: number):
-      WebGLTexture {
+      tex_util.TextureCreationResult {
     this.throwIfDisposed();
     return gpgpu_util.createFloat32MatrixTexture(
         this.gl, rows, columns, this.textureConfig);
   }
 
   public createFloat16MatrixTexture(rows: number, columns: number):
-      WebGLTexture {
+      tex_util.TextureCreationResult {
     this.throwIfDisposed();
     return gpgpu_util.createFloat16MatrixTexture(
         this.gl, rows, columns, this.textureConfig);
   }
 
   public createUnsignedBytesMatrixTexture(rows: number, columns: number):
-      WebGLTexture {
+      tex_util.TextureCreationResult {
     this.throwIfDisposed();
     return gpgpu_util.createUnsignedBytesMatrixTexture(
         this.gl, rows, columns, this.textureConfig);
@@ -172,14 +172,14 @@ export class GPGPUContext {
   }
 
   public createFloat16PackedMatrixTexture(rows: number, columns: number):
-      WebGLTexture {
+      tex_util.TextureCreationResult {
     this.throwIfDisposed();
     return gpgpu_util.createFloat16PackedMatrixTexture(
         this.gl, rows, columns, this.textureConfig);
   }
 
   public createPackedMatrixTexture(rows: number, columns: number):
-      WebGLTexture {
+      tex_util.TextureCreationResult {
     this.throwIfDisposed();
     return gpgpu_util.createPackedMatrixTexture(
         this.gl, rows, columns, this.textureConfig);
@@ -359,9 +359,9 @@ export class GPGPUContext {
   public setOutputPackedMatrixTexture(
       outputPackedMatrixTexture: WebGLTexture, rows: number, columns: number) {
     this.throwIfDisposed();
-    const [width, height] =
-        tex_util.getPackedMatrixTextureShapeWidthHeight(rows, columns);
-    this.setOutputMatrixTextureDriver(outputPackedMatrixTexture, width, height);
+    // const [width, height] =
+    //     tex_util.getPackedMatrixTextureShapeWidthHeight(rows, columns);
+    this.setOutputMatrixTextureDriver(outputPackedMatrixTexture, rows, columns);
   }
 
   public setOutputMatrixWriteRegion(

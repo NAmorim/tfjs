@@ -19,7 +19,7 @@ import {env} from '@tensorflow/tfjs-core';
 
 import {GPGPUContext} from './gpgpu_context';
 import {getInternalFormatForFloat16MatrixTexture, getInternalFormatForFloat16PackedMatrixTexture, getInternalFormatForFloat32MatrixTexture, getInternalFormatForPackedMatrixTexture, getInternalFormatForUnsignedBytesMatrixTexture} from './gpgpu_util';
-import {getPackedMatrixTextureShapeWidthHeight, getUnpackedMatrixTextureShapeWidthHeight, PhysicalTextureType, TextureConfig, TextureUsage} from './tex_util';
+import {getPackedMatrixTextureShapeWidthHeight, getUnpackedMatrixTextureShapeWidthHeight, PhysicalTextureType, TextureConfig, TextureCreationResult, TextureUsage} from './tex_util';
 
 export class TextureManager {
   private numUsedTextures = 0;
@@ -35,10 +35,22 @@ export class TextureManager {
 
   acquireTexture(
       shapeRC: [number, number], usage: TextureUsage,
-      isPacked: boolean): WebGLTexture {
+      isPacked: boolean): TextureCreationResult {
     const physicalTexType = getPhysicalFromLogicalTextureType(usage, isPacked);
-
-    const shapeKey = getKeyFromTextureShape(shapeRC, physicalTexType, isPacked);
+    let width = shapeRC[1], height = shapeRC[0];
+    if (physicalTexType === PhysicalTextureType.PACKED_2X2_FLOAT32 ||
+        physicalTexType === PhysicalTextureType.PACKED_2X2_FLOAT16) {
+      [width, height] = getPackedMatrixTextureShapeWidthHeight(...shapeRC);
+    } else if (physicalTexType === PhysicalTextureType.UNPACKED_FLOAT32) {
+      [width, height] = getUnpackedMatrixTextureShapeWidthHeight(...shapeRC);
+    } else if (physicalTexType === PhysicalTextureType.UNPACKED_FLOAT16) {
+      [width, height] = getUnpackedMatrixTextureShapeWidthHeight(...shapeRC);
+    } else if (
+        physicalTexType === PhysicalTextureType.PACKED_4X1_UNSIGNED_BYTE) {
+      [width, height] = getUnpackedMatrixTextureShapeWidthHeight(...shapeRC);
+    }
+    let shapeKey =
+        getKeyFromTextureShape([height, width], physicalTexType, isPacked);
     if (!(shapeKey in this.freeTextures)) {
       this.freeTextures[shapeKey] = [];
     }
@@ -47,20 +59,21 @@ export class TextureManager {
     }
 
     const texBytes = computeBytes(
-        shapeRC, physicalTexType, this.gpgpu.gl, this.gpgpu.textureConfig,
-        isPacked);
+        width, height, physicalTexType, this.gpgpu.gl,
+        this.gpgpu.textureConfig);
 
     if (this.freeTextures[shapeKey].length > 0) {
+      console.log('accuqire free ', shapeKey);
       this.numFreeTextures--;
       this.numUsedTextures++;
       this._numBytesFree -= texBytes;
       this.log();
       const newTexture = this.freeTextures[shapeKey].shift();
       this.usedTextures[shapeKey].push(newTexture);
-      return newTexture;
+      return {texture: newTexture, texShape: [height, width]};
     }
 
-    let newTexture: WebGLTexture;
+    let newTexture: TextureCreationResult;
     if (physicalTexType === PhysicalTextureType.PACKED_2X2_FLOAT32) {
       newTexture = this.gpgpu.createPackedMatrixTexture(shapeRC[0], shapeRC[1]);
     } else if (physicalTexType === PhysicalTextureType.PACKED_2X2_FLOAT16) {
@@ -77,7 +90,11 @@ export class TextureManager {
       newTexture =
           this.gpgpu.createUnsignedBytesMatrixTexture(shapeRC[0], shapeRC[1]);
     }
-    this.usedTextures[shapeKey].push(newTexture);
+
+    // recompute the shapeKey since the texShape could have changed during
+    // creation
+    this.usedTextures[shapeKey].push(newTexture.texture);
+    console.log('accuqire new ', shapeKey);
 
     this.numUsedTextures++;
     this._numBytesAllocated += texBytes;
@@ -96,13 +113,14 @@ export class TextureManager {
     const physicalTexType =
         getPhysicalFromLogicalTextureType(logicalTexType, isPacked);
     const shapeKey = getKeyFromTextureShape(shape, physicalTexType, isPacked);
+    // console.log('release', shapeKey);
     if (!(shapeKey in this.freeTextures)) {
       this.freeTextures[shapeKey] = [];
     }
 
     const texBytes = computeBytes(
-        shape, physicalTexType, this.gpgpu.gl, this.gpgpu.textureConfig,
-        isPacked);
+        shape[1], shape[0], physicalTexType, this.gpgpu.gl,
+        this.gpgpu.textureConfig);
     const deleteTexThreshold = env().get('WEBGL_DELETE_TEXTURE_THRESHOLD');
     if (deleteTexThreshold !== -1 &&
         this._numBytesAllocated > deleteTexThreshold) {
@@ -202,28 +220,16 @@ function numBytesForInternalFormat(
 }
 
 export function computeBytes(
-    shape: [number, number], physicalTexType: PhysicalTextureType,
-    gl: WebGLRenderingContext, textureConfig: TextureConfig,
-    isPacked: boolean): number {
+    width: number, height: number, physicalTexType: PhysicalTextureType,
+    gl: WebGLRenderingContext, textureConfig: TextureConfig): number {
   // It is not possible to infer packed status from the texture type because
   // depending on the textureConfig, different  texture types may resolve to the
   // same internal format (e.g. in WebGL1, the internal format for
-  // UNPACKED_FLOAT16 textures is gl.RGBA). Therefore we pass in `isPacked`
-  // explicitly.
+  // UNPACKED_FLOAT16 textures is gl.RGBA).
   const internalFormat =
       internalFormatForPhysicalTexType(physicalTexType, textureConfig);
 
-  let numElements: number;
-  if (isPacked) {
-    const [packedWidth, packedHeight] =
-        getPackedMatrixTextureShapeWidthHeight(shape[0], shape[1]);
-    numElements = packedWidth * packedHeight;
-
-  } else {
-    const [width, height] =
-        getUnpackedMatrixTextureShapeWidthHeight(shape[0], shape[1]);
-    numElements = width * height;
-  }
+  let numElements = width * height;
 
   const bytesPerElement = numBytesForInternalFormat(gl, internalFormat);
   return numElements * bytesPerElement;

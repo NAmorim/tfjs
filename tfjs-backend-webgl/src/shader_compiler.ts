@@ -417,8 +417,8 @@ function getOutputScalarCoords() {
 function getOutputPacked1DCoords(
     shape: [number], texShape: [number, number],
     enableShapeUniforms: boolean): string {
-  const packedTexShape =
-      [Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
+  const packedTexShape = texShape;
+  //[Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
   if (packedTexShape[0] === 1) {
     if (enableShapeUniforms) {
       return `
@@ -544,8 +544,8 @@ function getOutputPacked3DCoords(
   `;
   }
 
-  const packedTexShape =
-      [Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
+  const packedTexShape = texShape;
+  //[Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
   const texelsInLogicalRow = Math.ceil(shape[2] / 2);
   const texelsInBatch = texelsInLogicalRow * Math.ceil(shape[1] / 2);
 
@@ -627,8 +627,8 @@ function getOutputPackedNDCoords(
     }
   `;
   }
-  const packedTexShape =
-      [Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
+  const packedTexShape = texShape;
+  //[Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
 
   const texelsInLogicalRow = Math.ceil(shape[shape.length - 1] / 2);
   const texelsInBatch =
@@ -741,8 +741,8 @@ function getOutput6DCoords(
 function getOutputPacked2DCoords(
     shape: [number, number], texShape: [number, number],
     enableShapeUniforms: boolean): string {
-  const packedTexShape =
-      [Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
+  const packedTexShape = texShape;
+  //[Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
   if (util.arraysEqual(shape, texShape)) {
     if (enableShapeUniforms) {
       return `
@@ -953,8 +953,8 @@ function getPackedSampler1D(
     }
   `;
   }
-  const packedTexShape =
-      [Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
+  const packedTexShape = texShape;
+  //[Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
   return `
     vec4 ${funcName}(int index) {
       vec2 uv = packedUVfrom1D(
@@ -1086,8 +1086,8 @@ function getPackedSampler2D(
     }
   `;
   }
-  const packedTexShape =
-      [Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
+  const packedTexShape = texShape;
+  //[Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
   const valuesPerRow = Math.ceil(shape[1] / 2);
 
   return `
@@ -1221,8 +1221,8 @@ function getPackedSampler3D(
   const texName = inputInfo.name;
   const funcName = 'get' + texName.charAt(0).toUpperCase() + texName.slice(1);
   const texShape = inputInfo.shapeInfo.texShape;
-  const packedTexShape =
-      [Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
+  const packedTexShape = texShape;
+  //[Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
 
   if (shape[0] === 1) {
     const squeezedShape = shape.slice(1);
@@ -1402,8 +1402,8 @@ function getPackedSamplerND(
   const shape = inputInfo.shapeInfo.logicalShape;
   const rank = shape.length;
   const texShape = inputInfo.shapeInfo.texShape;
-  const packedTexShape =
-      [Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
+  const packedTexShape = texShape;
+  //[Math.ceil(texShape[0] / 2), Math.ceil(texShape[1] / 2)];
   const texNumR = packedTexShape[0];
   const texNumC = packedTexShape[1];
 

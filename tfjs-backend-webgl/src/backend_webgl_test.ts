@@ -462,28 +462,28 @@ describeWithFlags('computeBytes counts bytes correctly', WEBGL1_ENVS, () => {
     const shapeRC: [number, number] = [2, 3];
 
     let bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.UNPACKED_FLOAT16, gpgpu.gl,
+        shapeRC[1], shapeRC[0], PhysicalTextureType.UNPACKED_FLOAT16, gpgpu.gl,
         gpgpu.textureConfig, false /* isPacked */);
     expect(bytesForTex).toBe(96);
 
     bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.UNPACKED_FLOAT32, gpgpu.gl,
+        shapeRC[1], shapeRC[0], PhysicalTextureType.UNPACKED_FLOAT32, gpgpu.gl,
         gpgpu.textureConfig, false /* isPacked */);
     expect(bytesForTex).toBe(96);
 
     bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.PACKED_4X1_UNSIGNED_BYTE, gpgpu.gl,
-        gpgpu.textureConfig, true /* isPacked */);
+        shapeRC[1], shapeRC[0], PhysicalTextureType.PACKED_4X1_UNSIGNED_BYTE,
+        gpgpu.gl, gpgpu.textureConfig, true /* isPacked */);
     expect(bytesForTex).toBe(32);
 
     bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.PACKED_2X2_FLOAT32, gpgpu.gl,
-        gpgpu.textureConfig, true /* isPacked */);
+        shapeRC[1], shapeRC[0], PhysicalTextureType.PACKED_2X2_FLOAT32,
+        gpgpu.gl, gpgpu.textureConfig, true /* isPacked */);
     expect(bytesForTex).toBe(32);
 
     bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.PACKED_2X2_FLOAT16, gpgpu.gl,
-        gpgpu.textureConfig, true /* isPacked */);
+        shapeRC[1], shapeRC[0], PhysicalTextureType.PACKED_2X2_FLOAT16,
+        gpgpu.gl, gpgpu.textureConfig, true /* isPacked */);
     expect(bytesForTex).toBe(32);
 
     gpgpu.dispose();
@@ -497,28 +497,28 @@ describeWithFlags('computeBytes counts bytes correctly', WEBGL2_ENVS, () => {
     const shapeRC: [number, number] = [2, 3];
 
     let bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.UNPACKED_FLOAT16, gpgpu.gl,
+        shapeRC[1], shapeRC[0], PhysicalTextureType.UNPACKED_FLOAT16, gpgpu.gl,
         gpgpu.textureConfig, false /* isPacked */);
     expect(bytesForTex).toBe(12);
 
     bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.UNPACKED_FLOAT32, gpgpu.gl,
+        shapeRC[1], shapeRC[0], PhysicalTextureType.UNPACKED_FLOAT32, gpgpu.gl,
         gpgpu.textureConfig, false /* isPacked */);
     expect(bytesForTex).toBe(24);
 
     bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.PACKED_4X1_UNSIGNED_BYTE, gpgpu.gl,
-        gpgpu.textureConfig, true /* isPacked */);
+        shapeRC[1], shapeRC[0], PhysicalTextureType.PACKED_4X1_UNSIGNED_BYTE,
+        gpgpu.gl, gpgpu.textureConfig, true /* isPacked */);
     expect(bytesForTex).toBe(32);
 
     bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.PACKED_2X2_FLOAT32, gpgpu.gl,
-        gpgpu.textureConfig, true /* isPacked */);
+        shapeRC[1], shapeRC[0], PhysicalTextureType.PACKED_2X2_FLOAT32,
+        gpgpu.gl, gpgpu.textureConfig, true /* isPacked */);
     expect(bytesForTex).toBe(32);
 
     bytesForTex = computeBytes(
-        shapeRC, PhysicalTextureType.PACKED_2X2_FLOAT16, gpgpu.gl,
-        gpgpu.textureConfig, true /* isPacked */);
+        shapeRC[1], shapeRC[0], PhysicalTextureType.PACKED_2X2_FLOAT16,
+        gpgpu.gl, gpgpu.textureConfig, true /* isPacked */);
     expect(bytesForTex).toBe(16);
 
     gpgpu.dispose();
