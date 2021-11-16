@@ -1,12 +1,12 @@
 {
-  "name": "@tensorflow/tfjs-node",
-  "version": "0.0.0",
+  "name": "@namorim/tfjs-node",
+  "version": "3.11.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "gypfile": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/tensorflow/tfjs.git"
+    "url": "https://github.com/namorim/tfjs.git"
   },
   "license": "Apache-2.0",
   "engines": {
@@ -80,7 +80,7 @@
   "binary": {
     "module_name": "tfjs_binding",
     "module_path": "./lib/napi-v{napi_build_version}",
-    "host": "https://storage.googleapis.com/tf-builds/pre-built-binary",
+    "host": "https://github.com/tf-builds/pre-built-binary",
     "remote_path": "./napi-v{napi_build_version}/{version}/",
     "napi_versions": [
       3,
@@ -90,5 +90,8 @@
       7,
       8
     ]
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }
